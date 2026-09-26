@@ -222,6 +222,33 @@ ALTER TABLE ONLY public.grn_daily_main
 ALTER TABLE ONLY public.issue_daily_main
     ADD CONSTRAINT issue_daily_main_pkey PRIMARY KEY (id);
 
+--
+-- Name: update_timestamp trigger before update
+--
+
+CREATE OR REPLACE FUNCTION public.set_last_updated()
+RETURNS trigger AS $$
+BEGIN
+    NEW.last_updated = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_grn_daily_main_last_updated
+    BEFORE UPDATE ON public.grn_daily_main
+    FOR EACH ROW
+    EXECUTE FUNCTION public.set_last_updated();
+
+CREATE TRIGGER trg_pur_order_daily_main_last_updated
+    BEFORE UPDATE ON public.pur_order_daily_main
+    FOR EACH ROW
+    EXECUTE FUNCTION public.set_last_updated();
+
+CREATE TRIGGER trg_issue_daily_main_last_updated
+    BEFORE UPDATE ON public.issue_daily_main
+    FOR EACH ROW
+    EXECUTE FUNCTION public.set_last_updated();
+
 
 --
 -- Name: issue_daily_main issue_main_unique_cols; Type: CONSTRAINT; Schema: public; Owner: postgres
