@@ -1,0 +1,27 @@
+{
+  "_role": "StepFunctions-Orchestrator-Role",
+  "_attached_to": "State machine: arn:aws:states:ap-south-1:<ACCOUNT_ID>:stateMachine:ERP-Pipeline",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "lambda:InvokeFunction",
+      "Resource": "arn:aws:lambda:ap-south-1:<ACCOUNT_ID>:function:send_daily_rds_data_to_s3"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "glue:StartJobRun",
+        "glue:GetJobRun",
+        "glue:GetJobRuns",
+        "glue:BatchStopJobRun"
+      ],
+      "Resource": "arn:aws:glue:ap-south-1:<ACCOUNT_ID>:job/glue_transform"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "sns:Publish",
+      "Resource": "arn:aws:sns:ap-south-1:<ACCOUNT_ID>:bronze-silver-error"
+    }
+  ]
+}

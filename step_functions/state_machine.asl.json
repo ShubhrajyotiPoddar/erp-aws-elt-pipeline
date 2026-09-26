@@ -1,0 +1,74 @@
+{
+  "Comment": "ERP-Pipeline: extract a domain from RDS, transform in Glue only if new data exists, alert on any failure",
+  "StartAt": "ProcessDomains",
+  "States": {
+    "ProcessDomains": {
+      "Type": "Map",
+      "ItemsPath": "$.processes",
+      "MaxConcurrency": 3,
+      "ItemProcessor": {
+        "ProcessorConfig": { "Mode": "INLINE" },
+        "StartAt": "ExtractFromRDS",
+        "States": {
+          "ExtractFromRDS": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "arn:aws:lambda:ap-south-1:<ACCOUNT_ID>:function:send_daily_rds_data_to_s3",
+              "Payload": {
+                "process.$": "$.process",
+                "row_limit": 5000
+              }
+            },
+            "ResultSelector": {
+              "hasNewData.$": "$.Payload.has_new_data",
+              "process.$": "$.Payload.process"
+            },
+            "ResultPath": "$.extract",
+            "Catch": [
+              { "ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "NotifyFailure" }
+            ],
+            "Next": "HasNewData?"
+          },
+          "HasNewData?": {
+            "Type": "Choice",
+            "Choices": [
+              { "Variable": "$.extract.hasNewData", "BooleanEquals": true, "Next": "RunGlueTransform" }
+            ],
+            "Default": "NoNewData"
+          },
+          "NoNewData": { "Type": "Succeed" },
+          "RunGlueTransform": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::glue:startJobRun.sync",
+            "Parameters": {
+              "JobName": "glue_transform",
+              "Arguments": {
+                "--source_bucket": "shubhra-demo-s3-v001",
+                "--source_domain.$": "$.process",
+                "--target_database": "erp_silver",
+                "--target_table.$": "$.process",
+                "--sns_topic_arn": "arn:aws:sns:ap-south-1:<ACCOUNT_ID>:bronze-silver-error"
+              }
+            },
+            "Catch": [
+              { "ErrorEquals": ["States.ALL"], "ResultPath": "$.error", "Next": "NotifyFailure" }
+            ],
+            "End": true
+          },
+          "NotifyFailure": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::sns:publish",
+            "Parameters": {
+              "TopicArn": "arn:aws:sns:ap-south-1:<ACCOUNT_ID>:bronze-silver-error",
+              "Subject": "ERP pipeline failure",
+              "Message.$": "States.Format('Domain {} failed: {}', $.process, $.error.Cause)"
+            },
+            "End": true
+          }
+        }
+      },
+      "End": true
+    }
+  }
+}

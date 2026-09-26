@@ -1,0 +1,16 @@
+{
+  "_role": "Amazon_EventBridge_Scheduler_SFN_2f12106ab8",
+  "_attached_to": "3 EventBridge Scheduler entries (see eventbridge/schedules.md)",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "states:StartExecution"
+      ],
+      "Resource": [
+        "arn:aws:states:ap-south-1:<ACCOUNT_ID>:stateMachine:ERP-Pipeline"
+      ]
+    }
+  ]
+}

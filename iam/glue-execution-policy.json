@@ -1,0 +1,36 @@
+{
+  "_note": "Also has the AWS-managed AWSGlueServiceRole attached. This is the customer-managed addition, scoped to this bucket only.",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BucketLevel",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": "arn:aws:s3:::shubhra-demo-s3-v001"
+    },
+    {
+      "Sid": "ReadBronze",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::shubhra-demo-s3-v001/elt_rds_dumps/*"
+    },
+    {
+      "Sid": "ReadWriteSilver",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::shubhra-demo-s3-v001/silver/*"
+    },
+    {
+      "Sid": "PublishFailureAlerts",
+      "Effect": "Allow",
+      "Action": "sns:Publish",
+      "Resource": "arn:aws:sns:ap-south-1:<ACCOUNT_ID>:bronze-silver-error"
+    }
+  ]
+}

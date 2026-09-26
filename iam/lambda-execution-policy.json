@@ -1,0 +1,16 @@
+{
+  "_role": "send_daily_rds_data_to_s3-role-8e02z5xj-",
+  "_note": "Also has the AWS-managed AWSLambdaVPCAccessExecutionRole attached (CloudWatch Logs + ENI management for VPC access to RDS). The statement below is the customer-managed addition. An earlier s3:PutObject statement on elt_rds_dumps/* has been intentionally dropped: the actual S3 write happens via aws_s3.query_export_to_s3 inside Postgres, authenticated by the RDS instance's own role, not this one.",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:PutItem",
+        "dynamodb:GetItem",
+        "dynamodb:Query"
+      ],
+      "Resource": "arn:aws:dynamodb:ap-south-1:<ACCOUNT_ID>:table/dynamoDb-watermarks"
+    }
+  ]
+}

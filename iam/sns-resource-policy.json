@@ -1,0 +1,16 @@
+{
+  "_topic": "bronze-silver-error",
+  "_subscription": "email",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowStepFunctionsRoleToPublish",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::<ACCOUNT_ID>:role/StepFunctions-Orchestrator-Role"
+      },
+      "Action": "sns:Publish",
+      "Resource": "arn:aws:sns:ap-south-1:<ACCOUNT_ID>:bronze-silver-error"
+    }
+  ]
+}

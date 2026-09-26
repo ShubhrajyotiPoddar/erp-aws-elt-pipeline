@@ -1,0 +1,15 @@
+{
+  "_note": "Attached to the RDS instance's own IAM role (also has the AWS-managed AmazonRDSServiceRolePolicy) so aws_s3.query_export_to_s3 can write from inside Postgres. Not the Lambda's role.",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3PutObjAbortMultipart",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:AbortMultipartUpload"
+      ],
+      "Resource": "arn:aws:s3:::shubhra-demo-s3-v001/elt_rds_dumps/*"
+    }
+  ]
+}
